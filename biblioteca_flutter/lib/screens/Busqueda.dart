@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'DetallesLibro.dart'; // Asegúrate de que la ruta sea correcta
+
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
 
@@ -8,21 +12,29 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
-
-  // Datos de ejemplo
-  final List<Map<String, String>> _allBooks = [
-    {'title': 'Dune: The Duke of Caladan', 'author': 'Herbert Brian'},
-    {'title': 'Dune: The Machine Crusade', 'author': 'Herbert Brian'},
-    {'title': 'Dune: The Battle of Corrin', 'author': 'Herbert Brian'},
-    {'title': 'Dune: The Butlerian Jihad', 'author': 'Herbert Brian'},
-  ];
-
-  List<Map<String, String>> _filteredBooks = [];
+  List<Map<String, dynamic>> _filteredBooks = [];
+  List<Map<String, dynamic>> _allBooks = [];
 
   @override
   void initState() {
     super.initState();
-    _filteredBooks = _allBooks;
+    _initializeFirebase();
+  }
+
+  Future<void> _initializeFirebase() async {
+    await Firebase.initializeApp();
+    _fetchBooks();
+  }
+
+  Future<void> _fetchBooks() async {
+    FirebaseFirestore.instance.collection('libros').get().then((snapshot) {
+      List<Map<String, dynamic>> books =
+          snapshot.docs.map((doc) => doc.data()).toList();
+      setState(() {
+        _allBooks = books;
+        _filteredBooks = books;
+      });
+    });
   }
 
   void _searchBooks(String query) {
@@ -32,8 +44,14 @@ class _SearchScreenState extends State<SearchScreen> {
       } else {
         _filteredBooks = _allBooks
             .where((book) =>
-                book['title']!.toLowerCase().contains(query.toLowerCase()) ||
-                book['author']!.toLowerCase().contains(query.toLowerCase()))
+                book['titulo']
+                    .toString()
+                    .toLowerCase()
+                    .contains(query.toLowerCase()) ||
+                book['autor']
+                    .toString()
+                    .toLowerCase()
+                    .contains(query.toLowerCase()))
             .toList();
       }
     });
@@ -43,18 +61,15 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Imagen en el encabezado
         Image.network(
-          'https://img.freepik.com/vector-gratis/interior-biblioteca-sala-vacia-leer-libros-estantes-madera_33099-1722.jpg', // Cambia la ruta a tu imagen
+          'https://img.freepik.com/vector-gratis/interior-biblioteca-sala-vacia-leer-libros-estantes-madera_33099-1722.jpg',
           width: double.infinity,
           height: 150,
           fit: BoxFit.cover,
         ),
-        // Contenido principal (campo de búsqueda + lista)
         Expanded(
           child: Column(
             children: [
-              // Campo de texto para búsqueda
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
@@ -67,18 +82,29 @@ class _SearchScreenState extends State<SearchScreen> {
                   onChanged: _searchBooks,
                 ),
               ),
-              // Lista de resultados
               Expanded(
                 child: ListView.builder(
                   itemCount: _filteredBooks.length,
                   itemBuilder: (context, index) {
                     final book = _filteredBooks[index];
                     return ListTile(
-                      leading: const Icon(Icons.book),
-                      title: Text(book['title'] ?? ''),
-                      subtitle: Text(book['author'] ?? ''),
+                      leading: Image.network(
+                        book['portada'] ?? '',
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.image_not_supported),
+                      ),
+                      title: Text(book['titulo'] ?? ''),
+                      subtitle: Text(book['autor'] ?? ''),
                       onTap: () {
-                        // Acción al tocar un libro
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BookDetailsScreen(book: book),
+                          ),
+                        );
                       },
                     );
                   },
@@ -91,4 +117,3 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 }
-
