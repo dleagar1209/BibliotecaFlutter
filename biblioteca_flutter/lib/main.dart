@@ -1,116 +1,77 @@
 import 'package:flutter/material.dart';
+import 'screens/Busqueda.dart';
+import 'screens/Cuentas.dart';
+import 'screens/Inicio.dart';
 
 void main() {
-  runApp(BibliotecaApp());
+  runApp(const MyLibraryApp());
 }
 
-class BibliotecaApp extends StatelessWidget {
+class MyLibraryApp extends StatelessWidget {
+  const MyLibraryApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Biblioteca',
+      title: 'Greenfield County Library',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomeScreen(),
+      home: const HomePage(),
     );
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Biblioteca'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => CatalogScreen()),
-                  );
-                },
-                child: Text('Ver Catálogo'),
-              ),
-            ),
-            SizedBox(height: 50),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoanScreen()),
-                  );
-                },
-                child: Text('Realizar Préstamo'),
-              ),
-            ),
-            SizedBox(height: 50),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ReturnScreen()),
-                  );
-                },
-                child: Text('Devolver Libro'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  State<HomePage> createState() => _HomePageState();
 }
 
-class CatalogScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Catálogo de Libros'),
-      ),
-      body: Center(
-        child: Text('Listado de libros aquí...'),
-      ),
-    );
-  }
-}
+class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
 
-class LoanScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Realizar Préstamo'),
-      ),
-      body: Center(
-        child: Text('Formulario de préstamo aquí...'),
-      ),
-    );
-  }
-}
+  // Lista de pantallas que se mostrarán según el índice seleccionado
+  final List<Widget> _screens = const [
+    WelcomeScreen(),
+    SearchScreen(),
+    AccountsScreen(),
+  ];
 
-class ReturnScreen extends StatelessWidget {
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Devolver Libro'),
+        title: const Text('Greenfield County Library'),
       ),
-      body: Center(
-        child: Text('Formulario de devolución aquí...'),
+      body: _screens[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        backgroundColor: Colors.blueAccent,
+        selectedItemColor: const Color.fromARGB(255, 255, 255, 255),
+        unselectedItemColor: Colors.black,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Inicio',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Búsqueda',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Cuenta',
+          ),
+        ],
       ),
     );
   }
