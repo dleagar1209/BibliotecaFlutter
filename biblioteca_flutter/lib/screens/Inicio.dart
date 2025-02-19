@@ -20,7 +20,7 @@ class WelcomeScreen extends StatelessWidget {
       children: [
         // Imagen en el encabezado
         Image.network(
-          'https://img.freepik.com/vector-gratis/interior-biblioteca-sala-vacia-leer-libros-estantes-madera_33099-1722.jpg', // Cambia la ruta a tu imagen
+          'https://img.freepik.com/vector-gratis/interior-biblioteca-sala-vacia-leer-libros-estantes-madera_33099-1722.jpg',
           width: double.infinity,
           height: 150,
           fit: BoxFit.cover,
