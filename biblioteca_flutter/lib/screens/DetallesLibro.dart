@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class BookDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> book;
 
@@ -24,23 +23,23 @@ class BookDetailsScreen extends StatelessWidget {
                 height: 300,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) =>
-                    Icon(Icons.image_not_supported, size: 100),
+                    const Icon(Icons.image_not_supported, size: 100),
               ),
             ),
             const SizedBox(height: 20),
             Text(
               'Título: ${book['titulo'] ?? 'Desconocido'}',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             Text(
               'Autor: ${book['autor'] ?? 'Desconocido'}',
-              style: TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 10),
             Text(
               'Materia: ${book['materia'] ?? 'No especificado'}',
-              style: TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 10),
             Text(
