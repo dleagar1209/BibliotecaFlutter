@@ -4,7 +4,7 @@ import 'DetallesLibro.dart'; // Pantalla de detalles del libro
 import 'DetallesPrestamo.dart'; // Asegúrate de crear e importar la pantalla de detalles de préstamo
 
 class AccountsScreen extends StatelessWidget {
-  const AccountsScreen({Key? key}) : super(key: key);
+  const AccountsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

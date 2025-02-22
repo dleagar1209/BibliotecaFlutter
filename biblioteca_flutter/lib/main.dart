@@ -8,14 +8,14 @@ void main() {
 }
 
 class MyLibraryApp extends StatelessWidget {
-  const MyLibraryApp({Key? key}) : super(key: key);
+  const MyLibraryApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Greenfield County Library',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.blue
       ),
       home: const HomePage(),
     );
@@ -23,7 +23,7 @@ class MyLibraryApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();

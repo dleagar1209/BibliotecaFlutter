@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class BookDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> book;
 
-  const BookDetailsScreen({Key? key, required this.book}) : super(key: key);
+  const BookDetailsScreen({super.key, required this.book});
 
   @override
   State<BookDetailsScreen> createState() => _BookDetailsScreenState();

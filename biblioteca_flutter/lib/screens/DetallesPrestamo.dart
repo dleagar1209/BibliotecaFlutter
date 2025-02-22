@@ -6,7 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 class DetallesPrestamoScreen extends StatelessWidget {
-  const DetallesPrestamoScreen({Key? key}) : super(key: key);
+  const DetallesPrestamoScreen({super.key});
 
   // Método para obtener los libros prestados desde Firestore
   Future<List<Map<String, dynamic>>> obtenerLibrosPrestados() async {
