@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Necesario para cargar la imagen desde assets
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
@@ -54,52 +55,113 @@ class DetallesPrestamoScreen extends StatelessWidget {
     return librosConPrestamo;
   }
 
-  // Método para generar y guardar el PDF
+  // Método para generar y guardar el PDF, que incluye una gráfica de barras y el logo en la parte superior derecha
   Future<void> generarPDF(BuildContext context) async {
+    // Cargar la imagen del logo desde assets
+    final logoBytes = (await rootBundle.load('Assets/Images/logoBiblioteca.jpg')).buffer.asUint8List();
+    final logoImage = pw.MemoryImage(logoBytes);
+
     // Obtener los libros prestados
     List<Map<String, dynamic>> libros = await obtenerLibrosPrestados();
 
     if (libros.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('No hay préstamos activos para descargar')),
+        const SnackBar(content: Text('No hay préstamos activos para descargar')),
       );
       return;
     }
+
+    // Preparar datos para la gráfica: contar los préstamos por título de libro
+    final Map<String, int> chartData = {};
+    for (var libro in libros) {
+      final title = libro['titulo'] ?? 'Desconocido';
+      chartData[title] = (chartData[title] ?? 0) + 1;
+    }
+    final maxValue = chartData.values.isEmpty
+        ? 1
+        : chartData.values.reduce((a, b) => a > b ? a : b);
 
     // Crear el documento PDF
     final pdf = pw.Document();
 
     pdf.addPage(
       pw.Page(
-        build: (pw.Context context) => pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text('Detalles de Préstamos',
-                style:
-                    pw.TextStyle(fontSize: 22, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 20),
-            ...libros.map((libro) => pw.Padding(
-                  padding: const pw.EdgeInsets.symmetric(vertical: 8.0),
-                  child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text('📖 Título: ${libro['titulo'] ?? 'Desconocido'}',
-                          style: const pw.TextStyle(fontSize: 18)),
-                      pw.Text('✍ Autor: ${libro['autor'] ?? 'Desconocido'}',
-                          style: const pw.TextStyle(fontSize: 16)),
-                      pw.Text('📅 Fecha de préstamo: ${libro['fechaPrestamo']}',
-                          style: const pw.TextStyle(fontSize: 16)),
-                      pw.Divider(),
-                    ],
-                  ),
-                ))
-          ],
-        ),
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // Encabezado con el título y el logo a la derecha
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text('Detalles de Préstamos',
+                      style: pw.TextStyle(
+                          fontSize: 22, fontWeight: pw.FontWeight.bold)),
+                  pw.Image(logoImage, width: 80, height: 80),
+                ],
+              ),
+              pw.SizedBox(height: 20),
+              // Lista de préstamos
+              ...libros.map((libro) => pw.Padding(
+                    padding: const pw.EdgeInsets.symmetric(vertical: 8.0),
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text(
+                            '\uD83D\uDCD6 Título: ${libro['titulo'] ?? 'Desconocido'}',
+                            style: const pw.TextStyle(fontSize: 18)),
+                        pw.Text(
+                            '\u270D Autor: ${libro['autor'] ?? 'Desconocido'}',
+                            style: const pw.TextStyle(fontSize: 16)),
+                        pw.Text(
+                            '\uD83D\uDCC5 Fecha de préstamo: ${libro['fechaPrestamo']}',
+                            style: const pw.TextStyle(fontSize: 16)),
+                        pw.Divider(),
+                      ],
+                    ),
+                  )),
+              pw.SizedBox(height: 30),
+              // Sección de la gráfica
+              pw.Text('Gráfica de Préstamos por Libro',
+                  style: pw.TextStyle(
+                      fontSize: 20, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 10),
+              pw.Container(
+                height: 200,
+                child: pw.Row(
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  children: chartData.entries.map((entry) {
+                    // Escalar la altura de la barra según el valor máximo
+                    final barHeight = (entry.value / maxValue) * 150;
+                    return pw.Expanded(
+                      child: pw.Column(
+                        mainAxisAlignment: pw.MainAxisAlignment.end,
+                        children: [
+                          pw.Container(
+                            height: barHeight,
+                            width: 20,
+                            color: const PdfColor.fromInt(0xFF2196F3),
+                          ),
+                          pw.SizedBox(height: 4),
+                          pw.Text(entry.key,
+                              style: const pw.TextStyle(fontSize: 10),
+                              textAlign: pw.TextAlign.center),
+                          pw.Text('${entry.value}',
+                              style: const pw.TextStyle(fontSize: 10)),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
 
-    // Guardar el PDF en el directorio de documentos de la aplicación
+    // Guardar el PDF en el directorio de descargas de la aplicación
     final directory = await getDownloadsDirectory();
     if (directory == null) {
       print("No se pudo acceder a la carpeta de descargas.");
@@ -122,7 +184,7 @@ class DetallesPrestamoScreen extends StatelessWidget {
         title: const Text('Detalles de Préstamos'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
+            icon: const Icon(Icons.picture_as_pdf_sharp),
             onPressed: () => generarPDF(context),
           ),
         ],
