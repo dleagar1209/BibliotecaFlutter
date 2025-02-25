@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart'; // Importa el paquete para abrir archivos
 import 'dart:io';
 
 class DetallesPrestamoScreen extends StatelessWidget {
@@ -55,10 +56,12 @@ class DetallesPrestamoScreen extends StatelessWidget {
     return librosConPrestamo;
   }
 
-  // Método para generar y guardar el PDF, que incluye una gráfica de barras y el logo en la parte superior derecha
+  // Método para generar, guardar y abrir el PDF, que incluye una gráfica de barras y el logo en la parte superior derecha
   Future<void> generarPDF(BuildContext context) async {
     // Cargar la imagen del logo desde assets
-    final logoBytes = (await rootBundle.load('Assets/Images/logoBiblioteca.jpg')).buffer.asUint8List();
+    final logoBytes = (await rootBundle.load('Assets/Images/logoBiblioteca.jpg'))
+        .buffer
+        .asUint8List();
     final logoImage = pw.MemoryImage(logoBytes);
 
     // Obtener los libros prestados
@@ -66,7 +69,8 @@ class DetallesPrestamoScreen extends StatelessWidget {
 
     if (libros.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No hay préstamos activos para descargar')),
+        const SnackBar(
+            content: Text('No hay préstamos activos para descargar')),
       );
       return;
     }
@@ -104,7 +108,8 @@ class DetallesPrestamoScreen extends StatelessWidget {
               pw.SizedBox(height: 20),
               // Lista de préstamos
               ...libros.map((libro) => pw.Padding(
-                    padding: const pw.EdgeInsets.symmetric(vertical: 8.0),
+                    padding:
+                        const pw.EdgeInsets.symmetric(vertical: 8.0),
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
@@ -136,7 +141,8 @@ class DetallesPrestamoScreen extends StatelessWidget {
                     final barHeight = (entry.value / maxValue) * 150;
                     return pw.Expanded(
                       child: pw.Column(
-                        mainAxisAlignment: pw.MainAxisAlignment.end,
+                        mainAxisAlignment:
+                            pw.MainAxisAlignment.end,
                         children: [
                           pw.Container(
                             height: barHeight,
@@ -175,6 +181,9 @@ class DetallesPrestamoScreen extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('PDF guardado en: $filePath')),
     );
+
+    // Abrir el PDF automáticamente
+    OpenFile.open(filePath);
   }
 
   @override
@@ -212,12 +221,14 @@ class DetallesPrestamoScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Título: ${libro['titulo'] ?? 'Desconocido'}',
                         style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 5),
                       Text(
