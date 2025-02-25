@@ -21,8 +21,15 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.3
 
 flutter:
   uses-material-design: true
   assets:
     - Assets/Images/logoBiblioteca.jpg
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "Assets/Images/logoBiblioteca.jpg"  # Ruta de la imagen de tu icono
+
